@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header-css}"></head>
+<body class="bg-slate-50">
+    <div th:replace="~{fragments/header :: navbar}"></div>
+    
+    <main class="max-w-4xl mx-auto py-16 px-4">
+        <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
+            <div class="h-32 med-gradient"></div>
+            <div class="px-10 pb-10 -mt-16">
+                <div class="flex flex-col md:flex-row items-end gap-6 mb-10">
+                    <img th:src="@{/abha/getmyimage}" class="w-40 h-40 rounded-[2rem] object-cover border-8 border-white shadow-2xl" onerror="this.src='https://ui-avatars.com/api/?name=User&background=0d9488&color=fff&size=128'">
+                    <div class="flex-1 pb-2">
+                        <h1 class="text-4xl font-extrabold text-slate-900" th:text="${user.name}">User Name</h1>
+                        <p class="text-teal-600 font-bold">ABHA Verified Account</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">User ID</p>
+                        <p class="text-lg font-bold text-slate-800" th:text="'#' + ${user.id}">1</p>
+                    </div>
+                    <div class="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Mobile Number</p>
+                        <p class="text-lg font-bold text-slate-800">Verified</p>
+                    </div>
+                </div>
+
+                <div class="mt-10 pt-10 border-t border-slate-100">
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">Security Settings</h3>
+                    <button class="bg-slate-100 text-slate-700 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition">Change Password</button>
+                    <button class="text-red-500 px-6 py-3 rounded-xl font-bold hover:bg-red-50 transition ml-2">Deactivate Account</button>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

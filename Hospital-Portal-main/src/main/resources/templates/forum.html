@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header-css}"></head>
+<body class="bg-slate-50">
+    <div th:replace="~{fragments/header :: navbar}"></div>
+
+    <div class="max-w-5xl mx-auto py-10 px-4">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Health Community</h1>
+                <p class="text-slate-600">Share experiences, ask questions, and support others.</p>
+            </div>
+            <button onclick="toggleModal(true)" class="med-gradient text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-teal-100 hover:scale-105 transition flex items-center">
+                <i class="fa-solid fa-pen-to-square mr-2"></i> Start Discussion
+            </button>
+        </div>
+
+        <!-- Search Bar -->
+        <form action="/web/forum" method="GET" class="mb-8">
+            <div class="relative group">
+                <input type="text" name="query" th:value="${param.query}" placeholder="Search topics (e.g. Surgery, Best Cardiologist)..." 
+                    class="w-full pl-12 pr-4 py-4 rounded-2xl border-none shadow-sm focus:ring-2 focus:ring-teal-500 transition-all bg-white">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-teal-500 transition"></i>
+            </div>
+        </form>
+
+        <!-- Empty State -->
+        <div th:if="${#lists.isEmpty(discussions)}" class="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200">
+            <i class="fa-solid fa-comments-slash text-5xl text-slate-200 mb-4"></i>
+            <h3 class="text-xl font-bold text-slate-800">No discussions yet</h3>
+            <p class="text-slate-500 mb-6">Be the first to start a conversation in this community.</p>
+            <button onclick="toggleModal(true)" class="text-teal-600 font-bold hover:underline">Start one now</button>
+        </div>
+
+        <!-- Discussion List -->
+        <div class="space-y-4">
+            <div th:each="disc : ${discussions}" class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all border border-slate-100 group">
+                <div class="flex justify-between items-start mb-3">
+                    <span class="bg-teal-50 text-teal-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider flex items-center">
+                        <i class="fa-solid fa-hospital-user mr-1.5 text-[10px]"></i>
+                        <span th:text="${disc.hospitalName != null ? disc.hospitalName : 'General Consultation'}">Hospital</span>
+                    </span>
+                    <span class="text-slate-400 text-sm italic" th:text="${#temporals.format(disc.createdTime, 'dd MMM yyyy')}">Date</span>
+                </div>
+                
+                <a th:href="@{'/web/forum/discussion/' + ${disc.id}}" class="block">
+                    <h2 class="text-xl font-bold text-slate-800 group-hover:text-teal-600 mb-2 transition" th:text="${disc.title}">Discussion Title</h2>
+                    <p class="text-slate-600 line-clamp-2 leading-relaxed" th:text="${disc.content}">Summary of the discussion...</p>
+                </a>
+
+                <div class="mt-5 pt-4 border-t border-slate-50 flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-9 h-9 rounded-full med-gradient flex items-center justify-center text-white mr-3 shadow-sm font-bold text-xs" 
+                             th:text="${#strings.substring(disc.authorName,0,1)}">U</div>
+                        <span class="text-sm font-semibold text-slate-700" th:text="${disc.authorName}">Author</span>
+                    </div>
+                    <a th:href="@{'/web/forum/discussion/' + ${disc.id}}" class="flex items-center text-slate-400 hover:text-teal-600 text-sm gap-4 transition">
+                    <span><i class="fa-regular fa-comment-dots mr-1"></i> Comments</span>
+                    <i class="fa-solid fa-chevron-right text-[10px] group-hover:translate-x-1 transition"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- START DISCUSSION MODAL -->
+    <div id="discussionModal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity bg-slate-900/60 backdrop-blur-sm" onclick="toggleModal(false)"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen"></span>&#8203;
+            
+            <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-3xl shadow-2xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="px-8 py-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold text-slate-900">New Discussion</h3>
+                        <button onclick="toggleModal(false)" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+                    </div>
+
+                    <form action="/web/forum/create" method="POST" class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Discussion Title</label>
+                            <input type="text" name="title" required placeholder="What is on your mind?" 
+                                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Related Hospital (Optional)</label>
+                            <select name="hospitalid" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none">
+                                <option value="">General / None</option>
+                                <option th:each="h : ${hospitals}" th:value="${h.id}" th:text="${h.name}">Hospital Name</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Description</label>
+                            <textarea name="content" rows="4" required placeholder="Describe your experience or ask your question..." 
+                                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none"></textarea>
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit" class="w-full med-gradient text-white py-4 rounded-xl font-bold text-lg hover:shadow-lg transition">
+                                Post to Community
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleModal(show) {
+            const modal = document.getElementById('discussionModal');
+            if (show) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } else {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+    </script>
+</body>
+</html>

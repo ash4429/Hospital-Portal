@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processing | Health Portal</title>
+    <!-- Using Tailwind CSS to match your UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 flex items-center justify-center min-h-screen">
+
+    <main class="max-w-md w-full px-6">
+        <div class="bg-white p-10 rounded-[3rem] shadow-xl border border-slate-100 text-center">
+            
+            <!-- Animated Icon Section -->
+            <div class="relative mb-8">
+                <div class="w-24 h-24 bg-teal-50 rounded-full flex items-center justify-center mx-auto animate-pulse">
+                    <i class="fa-solid fa-gears text-4xl text-teal-600"></i>
+                </div>
+                <!-- Small orbiting dot decoration -->
+                <div class="absolute top-0 right-1/3 w-4 h-4 bg-teal-400 rounded-full border-4 border-white shadow-sm"></div>
+            </div>
+
+            <!-- Text Content -->
+            <h1 class="text-3xl font-extrabold text-slate-800 mb-4">Under Process</h1>
+            
+            <!-- This will display the message passed from the Controller -->
+            <p class="text-slate-500 leading-relaxed mb-8" 
+               th:text="${statusMessage != null ? statusMessage : 'We are currently analyzing your documents. This might take a few moments.'}">
+                Default processing message...
+            </p>
+
+            <!-- Progress Bar Animation -->
+            <div class="w-full bg-slate-100 h-2 rounded-full mb-8 overflow-hidden">
+                <div class="bg-teal-500 h-full rounded-full animate-[progress_2s_ease-in-out_infinite]" style="width: 50%;"></div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-3">
+                <a th:href="@{/profile}" 
+                   class="block w-full py-4 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-2xl transition-all shadow-lg shadow-teal-200">
+                    Go Back to Profile
+                </a>
+                <p class="text-xs text-slate-400 uppercase tracking-widest font-bold">Please do not refresh the page</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Custom Animation for the Progress Bar -->
+    <style>
+        @keyframes progress {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+    </style>
+
+    <!-- Pop-up Script (Same logic as before) -->
+    <script th:inline="javascript">
+        var message = [[${message}]];
+        if (message) {
+            alert(message);
+        }
+    </script>
+</body>
+</html>

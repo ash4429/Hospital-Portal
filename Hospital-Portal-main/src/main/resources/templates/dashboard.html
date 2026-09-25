@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header-css}"></head>
+<body class="bg-slate-50">
+    <div th:replace="~{fragments/header :: navbar}"></div>
+
+    <main class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+        <div th:if="${user == null}" class="bg-red-100 p-4 rounded-xl text-red-700">
+            Error: User data could not be loaded. Please <a href="/logout" class="underline font-bold">Logout</a> and try again.
+        </div>
+
+        <div th:if="${user != null}" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left Column: Profile Card & Quick Actions -->
+            <div class="space-y-6">
+                <!-- Profile Card -->
+                <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 text-center">
+                    <div class="relative inline-block mb-6">
+                        <img th:src="@{/abha/getmyimage}" 
+                             class="w-40 h-40 rounded-3xl object-cover border-4 border-white shadow-xl mx-auto" 
+                             onerror="this.src='https://ui-avatars.com/api/?name=User&background=0d9488&color=fff&size=128'">
+                    </div>
+                    <h2 class="text-2xl font-extrabold text-slate-800 mb-1" th:text="${user.name}">Patient Name</h2>
+                    <p class="text-teal-600 font-bold text-sm tracking-widest uppercase mb-6">Verified Patient</p>
+                    
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex items-center justify-between text-left">
+                        <div>
+                            <p class="text-[10px] uppercase font-bold text-slate-400">ABHA Number</p>
+                            <p class="font-mono text-slate-700 font-bold">#0000-<span th:text="${user.id}">1</span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                    <h4 class="font-bold text-slate-800 mb-4 px-2">Quick Actions</h4>
+                    <div class="space-y-2">
+                        <a href="/web/forum" class="flex items-center p-3 rounded-xl hover:bg-teal-50 text-slate-600 transition font-medium">
+                            <i class="fa-solid fa-comments w-8"></i> Community
+                        </a>
+                        <!-- Updated this to trigger the JS function -->
+                        <button onclick="findNearbyHospitals()" class="w-full flex items-center p-3 rounded-xl hover:bg-teal-50 text-slate-600 transition font-medium text-left">
+                            <i class="fa-solid fa-hospital w-8"></i> Hospitals
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Upload & Nearby Hospitals -->
+            <div class="lg:col-span-2 space-y-8">
+                
+                <!-- NEW: Find Nearby Hospitals Card -->
+                <div class="bg-teal-600 p-8 rounded-[2rem] shadow-xl shadow-teal-100 text-white flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2">Need Emergency Care?</h3>
+                        <p class="text-teal-50 opacity-90">Locate the nearest hospitals within 50km in seconds.</p>
+                    </div>
+                    <button onclick="findNearbyHospitals()" id="locBtn" class="bg-white text-teal-600 font-bold px-8 py-4 rounded-2xl shadow-lg hover:scale-105 transition-all whitespace-nowrap">
+                        <i class="fa-solid fa-location-crosshairs mr-2"></i> Find Nearby
+                    </button>
+                </div>
+
+                <!-- Upload Section -->
+                <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+                    <h3 class="text-2xl font-bold text-slate-900 mb-2">Medical Documents</h3>
+                    <p class="text-slate-500 mb-8">Upload reports for AI-powered health analysis.</p>
+                    <form action="/web/upload" method="POST" enctype="multipart/form-data">
+                        <div class="border-2 border-dashed border-slate-200 rounded-3xl p-12 text-center hover:border-teal-400 transition-all bg-slate-50/50 cursor-pointer"
+                             onclick="document.getElementById('fileInput').click()">
+                            <input type="file" id="fileInput" name="image" class="hidden" onchange="this.form.submit()">
+                            <i class="fa-solid fa-cloud-arrow-up text-4xl text-teal-600 mb-4"></i>
+                            <h4 class="text-lg font-bold text-slate-800">Click to upload report</h4>
+                        </div>
+                    </form>
+                </div>
+                
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script th:inline="javascript">
+    /* Pop-up Logic for Upload Messages */
+    var message = [[${message}]];
+    var messageType = [[${messageType}]];
+
+    if (message) {
+        Swal.fire({
+            title: messageType === 'success' ? 'Done!' : 'Error!',
+            text: message,
+            icon: messageType,
+            confirmButtonColor: '#0d9488'
+        });
+    }
+
+    /* Hospital Location Logic */
+    function findNearbyHospitals() {
+        const btn = document.getElementById('locBtn');
+        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Locating...';
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                // Sends coordinates to the MVC controller you made
+                window.location.href = `/web/hospitals?lat=${lat}&lon=${lon}`;
+            }, (error) => {
+                // If permission is denied, just go to the page anyway (it will show an empty state or allow search)
+                window.location.href = `/web/hospitals`;
+            });
+        } else {
+            alert("Geolocation is not supported by your browser.");
+        }
+    }
+    </script>
+</body>
+</html>

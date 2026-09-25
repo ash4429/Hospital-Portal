@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header-css}">
+    <style>
+        .med-gradient { background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%); }
+        .page-fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="bg-slate-50 page-fade-in">
+    <div th:replace="~{fragments/header :: navbar}"></div>
+
+    <header class="med-gradient pt-16 pb-32 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 text-center relative z-10">
+            <h1 class="text-4xl font-extrabold text-white mb-2 tracking-tight">Verified Healthcare</h1>
+            <p class="text-teal-50 text-lg max-w-2xl mx-auto opacity-90">Find top-rated medical centers near you.</p>
+        </div>
+    </header>
+
+    <main class="max-w-[1600px] mx-auto px-4 -mt-16">
+        <!-- Search Form -->
+<!-- Search Section -->
+<!-- Increased mb-32 to push hospitals far down and avoid overlap -->
+<div class="max-w-7xl mx-auto px-4 -mt-12 mb-32 relative z-20">
+    <form action="/web/hospitals" method="GET" class="flex flex-col lg:flex-row items-center gap-4">
+        
+        <!-- Box 1: Hospital Name -->
+        <div class="flex-[1.5] w-full bg-white p-4 rounded-[2rem] shadow-[0_15px_35px_rgba(0,0,0,0.1)] border border-slate-100 flex items-center hover:shadow-2xl transition-shadow group">
+            <div class="w-12 h-12 bg-teal-50 rounded-2xl flex items-center justify-center text-teal-600 mr-4 shrink-0 transition-colors group-focus-within:bg-teal-600 group-focus-within:text-white">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+            <div class="w-full">
+                <label class="block text-[10px] uppercase font-black text-slate-400 tracking-widest mb-1">Search Hospital</label>
+                <input type="text" name="name" th:value="${param.name}" placeholder="Type hospital name..." 
+                       class="w-full bg-transparent border-none p-0 text-base font-bold text-slate-700 placeholder:text-slate-300 focus:ring-0 focus:outline-none outline-none">
+            </div>
+        </div>
+
+        <!-- Box 2: Location Selector -->
+        <div class="flex-1 w-full bg-white p-4 rounded-[2rem] shadow-[0_15px_35px_rgba(0,0,0,0.1)] border border-slate-100 flex items-center hover:shadow-2xl transition-shadow group">
+            <div class="w-12 h-12 bg-teal-50 rounded-2xl flex items-center justify-center text-teal-600 mr-4 shrink-0 transition-colors group-focus-within:bg-teal-600 group-focus-within:text-white">
+                <i class="fa-solid fa-location-dot"></i>
+            </div>
+            <div class="w-full">
+                <label class="block text-[10px] uppercase font-black text-slate-400 tracking-widest mb-1">In City</label>
+                <select name="city" class="w-full bg-transparent border-none p-0 text-base font-bold text-slate-700 appearance-none cursor-pointer focus:ring-0 focus:outline-none outline-none">
+                    <option value="">All Cities</option>
+                    <option value="Patna" th:selected="${param.city == 'Patna'}">Patna</option>
+                    <option value="Bihta" th:selected="${param.city == 'Bihta'}">Bihta</option>
+                    <option value="Ara" th:selected="${param.city == 'Ara'}">Ara Junction</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Box 3: The Filter Button -->
+        <button type="submit" class="w-full lg:w-auto bg-[#101827] hover:bg-teal-600 text-white px-12 py-6 rounded-[2rem] font-black text-xs uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3 shadow-2xl hover:-translate-y-1 active:scale-95 whitespace-nowrap">
+            <span>Apply Filters</span>
+            <i class="fa-solid fa-arrow-right-long text-teal-400"></i>
+        </button>
+
+        <!-- Hidden coordinates -->
+        <input type="hidden" name="lat" th:value="${param.lat}">
+        <input type="hidden" name="lon" th:value="${param.lon}">
+    </form>
+</div>
+
+        <!-- Hospital Cards Grid (Small Boxes) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            
+            <div th:each="h : ${hospitals}" class="bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all overflow-hidden flex flex-col group">
+                
+                <!-- Image Header (Smaller Height) -->
+                <div class="h-44 relative overflow-hidden">
+                    <img th:src="${h.imageUrl != null ? h.imageUrl : 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=400'}" 
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    
+                    <!-- Distance Overlay -->
+                    <div th:if="${h.distance != null}" class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-teal-700 px-3 py-1 rounded-xl text-xs font-black shadow-sm">
+                        <i class="fa-solid fa-route mr-1"></i> <span th:text="${h.distance} + ' km'">0.0 km</span>
+                    </div>
+
+                    <!-- Rating Overlay -->
+                    <div class="absolute bottom-3 left-3 bg-teal-600 text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-lg">
+                        <i class="fa-solid fa-star text-amber-300 mr-1"></i> <span th:text="${h.ratings}">5</span> Rating
+                    </div>
+                </div>
+
+                <!-- Content Area (Reduced Padding) -->
+                <div class="p-5 flex-1 flex flex-col">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-bold text-slate-800 leading-tight mb-1 truncate" th:title="${h.name}" th:text="${h.name}">Hospital Name</h3>
+                        <p class="text-teal-600 font-bold text-[11px] uppercase tracking-wider flex items-center gap-1">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span th:text="${h.location.city + ', ' + h.location.state}">City, State</span>
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-50 rounded-xl p-3 mb-5 border border-slate-100">
+                        <p class="text-slate-500 text-[11px] leading-relaxed italic line-clamp-1" th:text="${h.location.nearByAddress}">Address info</p>
+                    </div>
+
+                    <!-- Buttons Row -->
+                    <div class="mt-auto flex flex-col gap-2">
+                        <a th:href="'https://www.google.com/maps/search/?api=1&query=' + ${h.location.latitude} + ',' + ${h.location.longitude}" 
+                           target="_blank" 
+                           class="w-full text-center py-3 bg-teal-600 text-white text-xs font-black rounded-xl hover:bg-teal-700 transition-all shadow-sm shadow-teal-100">
+                            VIEW DIRECTIONS
+                        </a>
+                        <a th:href="@{'/web/forum/hospital/' + ${h.id}}" 
+                           class="w-full text-center py-2 bg-white text-slate-400 text-[10px] font-bold rounded-xl border border-slate-100 hover:bg-slate-50 transition-all uppercase tracking-tighter">
+                            Patient Community
+                        </a>
+                    </div>
+                </div>
+            </div> <!-- End Card -->
+        </div>
+
+        <!-- Empty state -->
+        <div th:if="${#lists.isEmpty(hospitals)}" class="text-center py-20">
+            <div class="bg-white inline-block p-12 rounded-[3rem] shadow-sm">
+                <i class="fa-solid fa-hospital-slash text-5xl text-slate-200 mb-4"></i>
+                <h3 class="text-xl font-bold text-slate-700">No hospitals found</h3>
+                <p class="text-slate-400">Try adjusting your filters or location.</p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
